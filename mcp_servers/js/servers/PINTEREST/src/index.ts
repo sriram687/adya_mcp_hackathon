@@ -14,7 +14,7 @@ const server = new McpServer({
 // get-boards tool
 server.tool(
   "get-boards",
-  "Fetches all Pinterest boards for the authenticated user.",
+  "Get my Pinterest boards",
   {
     accessToken: z.string().describe("Pinterest OAuth access token"),
   },
@@ -65,11 +65,12 @@ async function main() {
   try {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.log(` Server connected: ${server.isConnected}`);
+    console.log(`✅ Server connected: ${server.isConnected()}`);
   } catch (error: any) {
-    console.error(" Fatal error in main()", error.message);
+    console.error("❌ Fatal error in main()", error.message);
     process.exit(1);
   }
 }
+
 
 main();
