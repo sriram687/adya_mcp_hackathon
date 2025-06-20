@@ -5,16 +5,20 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import axios from "axios";
 
-// Create server
+// ================ SERVER INIT ================
 const server = new McpServer({
   name: "PINTEREST",
   version: "1.0.0",
+  capabilities: {
+    tools: {},
+    resources: {},
+  },
 });
 
-// get-boards tool
+// ================ TOOL: get-boards ================
 server.tool(
   "get-boards",
-  "Get my Pinterest boards",
+  "Fetches all Pinterest boards for the authenticated user.",
   {
     accessToken: z.string().describe("Pinterest OAuth access token"),
   },
@@ -32,9 +36,9 @@ server.tool(
         ? boards
             .map(
               (b: any) =>
-                `ID: ${b.id}\nName: ${b.name}\nDescription: ${
+                `📌 Name: ${b.name}\n🆔 ID: ${b.id}\n👤 Owner: ${b.owner?.username}\n📝 Description: ${
                   b.description || "N/A"
-                }\n---`
+                }\n---------------------`
             )
             .join("\n")
         : "No boards found.";
@@ -52,7 +56,7 @@ server.tool(
         content: [
           {
             type: "text",
-            text: `Error fetching boards: ${error.message}`,
+            text: `❌ Error fetching boards: ${error.response?.data?.message || error.message}`,
           },
         ],
       };
@@ -60,17 +64,20 @@ server.tool(
   }
 );
 
-//  Connect the server
+// ================ MAIN FUNCTION ================
 async function main() {
   try {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.log(`✅ Server connected: ${server.isConnected()}`);
+
+    console.log("✅ Pinterest MCP Server connected:", server.isConnected());
   } catch (error: any) {
-    console.error("❌ Fatal error in main()", error.message);
+    console.error("❌ Fatal error in main():", error.message);
     process.exit(1);
   }
 }
 
-
-main();
+main().catch((error) => {
+  console.error("❌ Unhandled error:", error);
+  process.exit(1);
+});
