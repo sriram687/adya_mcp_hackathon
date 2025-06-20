@@ -7,7 +7,7 @@ import axios from "axios";
 
 // Create server
 const server = new McpServer({
-  name: "pinterest",
+  name: "PINTEREST",
   version: "1.0.0",
 });
 
