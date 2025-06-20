@@ -2132,7 +2132,6 @@ async function main() {
   // } catch (error) {
   //   console.log("Error deleting category:", error);
   // }
-  console.log("End of main()");
 }
 
 
