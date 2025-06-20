@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
-import {StdioServerTransport} from '@modelcontextprotocol/sdk/server/stdio'
+import {StdioServerTransport} from '@modelcontextprotocol/sdk/server/stdio.js'
 import {getBoardsTool} from './tools/getBoards.js';
 
 const server= new McpServer({
