@@ -16,6 +16,7 @@ const server = new McpServer({
 });
 
 // ================ TOOL ================
+//get board
 server.tool(
   "get-boards",
   "Fetches all Pinterest boards for the authenticated user.",
@@ -63,6 +64,7 @@ server.tool(
     }
   }
 );
+//create board
 server.tool(
   "create-board",
   "Creates a new Pinterest board.",
@@ -110,6 +112,55 @@ server.tool(
     }
   }
 );
+
+// Delete Pin
+server.tool("delete-pin", "Delete a pin.", {
+  accessToken: z.string(),
+  pinId: z.string(),
+}, async ({ accessToken, pinId }) => {
+  try {
+    await axios.delete(`https://api.pinterest.com/v5/pins/${pinId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return { content: toText(`✅ Pin deleted.`) };
+  } catch (err: any) {
+    return { content: toText(`Error deleting pin: ${err.message}`) };
+  }
+});
+
+// Get User Profile
+server.tool("get-user-profile", "Fetch user's profile.", {
+  accessToken: z.string(),
+}, async ({ accessToken }) => {
+  try {
+    const res = await axios.get("https://api.pinterest.com/v5/user_account", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const user = res.data;
+    return { content: toText(`👤 ${user.username}\nName: ${user.profile?.display_name || "N/A"}`) };
+  } catch (err: any) {
+    return { content: toText(`Error fetching profile: ${err.message}`) };
+  }
+});
+
+// Get User Followers
+server.tool("get-user-followers", "Fetch user's followers.", {
+  accessToken: z.string(),
+}, async ({ accessToken }) => {
+  try {
+    const res = await axios.get("https://api.pinterest.com/v5/user_account/followers", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const followers = res.data.items;
+    if (!followers || followers.length === 0) return { content: toText("No followers found.") };
+
+    const followersText = followers.map((f: any) => `👤 ${f.username}`).join("\n");
+    return { content: toText(followersText) };
+  } catch (err: any) {
+    return { content: toText(`Error fetching followers: ${err.message}`) };
+  }
+});
+
 
 // ================ MAIN FUNCTION ================
 async function main() {
