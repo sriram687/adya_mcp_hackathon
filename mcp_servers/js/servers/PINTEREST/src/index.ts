@@ -15,7 +15,7 @@ const server = new McpServer({
   },
 });
 
-// ================ TOOL: get-boards ================
+// ================ TOOL ================
 server.tool(
   "get-boards",
   "Fetches all Pinterest boards for the authenticated user.",
@@ -57,6 +57,53 @@ server.tool(
           {
             type: "text",
             text: `❌ Error fetching boards: ${error.response?.data?.message || error.message}`,
+          },
+        ],
+      };
+    }
+  }
+);
+server.tool(
+  "create-board",
+  "Creates a new Pinterest board.",
+  {
+    accessToken: z.string(),
+    name: z.string().describe("Name of the new board"),
+    description: z.string().optional().describe("Board description"),
+    privacy: z.enum(["PUBLIC", "PRIVATE"]).default("PUBLIC"),
+  },
+  async ({ accessToken, name, description, privacy }) => {
+    try {
+      const response = await axios.post(
+        "https://api.pinterest.com/v5/boards",
+        {
+          name,
+          description,
+          privacy,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const board = response.data;
+      return {
+        content: [
+          {
+            type: "text",
+            text: `✅ Board "${board.name}" created successfully (ID: ${board.id})`,
+          },
+        ],
+      };
+    } catch (error: any) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `❌ Error creating board: ${error.response?.data?.message || error.message}`,
           },
         ],
       };
