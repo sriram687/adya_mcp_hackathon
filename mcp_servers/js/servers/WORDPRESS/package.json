@@ -1,5 +1,5 @@
 {
-  "name": "prathammanocha-comprehensive-wp-mcp",
+  "name": "wordpress-mcp-server",
   "version": "1.0.0",
   "description": "WordPress MCP Server with comprehensive API support",
   "type": "module",

@@ -1,7 +1,7 @@
 {
-  "name": "prathammanocha-comprehensive-wp-mcp",
+  "name": "pinterest-mcp-server",
   "version": "1.0.0",
-  "description": "WordPress MCP Server with comprehensive API support",
+  "description": "Pinterest MCP Server with comprehensive API support",
   "type": "module",
   "main": "build/index.js",
   "scripts": {
@@ -10,21 +10,29 @@
     "dev": "tsc -w"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.3",
-    "axios": "^1.8.4",
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "axios": "^1.10.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "openai": "^4.98.0",
+    "qs": "^6.14.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/node": "^20.17.30",
     "typescript": "^5.0.0"
   },
   "keywords": [
-    "wordpress",
+    "pinterest",
     "mcp",
+    "oauth",
     "api",
     "ai",
-    "assistant"
+    "assistant",
+    "tool",
+    "boards",
+    "integration"
   ],
   "author": "",
   "license": "ISC"
