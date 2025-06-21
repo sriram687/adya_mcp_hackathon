@@ -57,7 +57,7 @@ server.tool(
     accessToken: z.string(),
     name: z.string().describe("Name of the new board"),
     description: z.string().optional().describe("Board description"),
-    privacy: z.enum(["PUBLIC", "PRIVATE"]).default("PUBLIC"),
+    privacy: z.enum(["PUBLIC", "PROTECTED", "SECRET"]).default("PUBLIC"),
   },
   async ({ accessToken, name, description, privacy }) => {
     try {
