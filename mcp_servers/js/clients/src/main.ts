@@ -172,7 +172,7 @@ app.post('/api/v1/mcp/process_message_stream', async (req: any, res: any) => {
 
 console.log("Current working directory:", process.cwd());
 // Start the server
-const PORT = 5000;
+const PORT = 5050;
 app.listen(PORT, async () => {
   await initializeAlllMCP();
   console.log("╔═══════════════════════════════════════════════════════════════════════════════════════════╗");
@@ -181,7 +181,7 @@ app.listen(PORT, async () => {
   console.log("║                                                                                           ║");
   console.log("║  🎉 Welcome to the MCP(Model Context Protocol) Server Integration Hackathon 2k25 !! 🎉    ║");
   console.log("║                                                                                           ║");
-  console.log("║  ✅ Server running on http://localhost:5000 ✅                                            ║");
+  console.log("║  ✅ Server running on http://localhost:5050 ✅                                            ║");
   console.log("║                                                                                           ║");
   console.log("╚═══════════════════════════════════════════════════════════════════════════════════════════╝");
 });

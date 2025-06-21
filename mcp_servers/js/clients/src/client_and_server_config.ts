@@ -5,16 +5,16 @@ export const ClientsConfig:any = [
     // "CLAUDE",
 ]
 
-export const ServersConfig:any = [
-    {
-        server_name :"WORDPRESS",
-        server_features_and_capability:`WORDPRESS`,
-        path : "build/index.js"
-    },
-    // {
-    //     server_name :"WORDPRESS",
-    //     server_features_and_capability:`WORDPRESS`,
-    //     path : "build/index.js"
-    // }
-]
+export const ServersConfig: any = [
+  {
+    server_name: "WORDPRESS",
+    server_features_and_capability: "WORDPRESS",
+    path: "build/index.js", // WordPress build
+  },
+  {
+    server_name: "PINTEREST", // Pinterest build
+    server_features_and_capability: "PINTEREST",
+    path: "build/index.js", // same structure
+  },
+];
 
