@@ -15,8 +15,7 @@ const server = new McpServer({
   },
 });
 
-// ================ TOOL ================
-//get board
+// ================ TOOL: Get Boards ================
 server.tool(
   "get-boards",
   "Fetches all Pinterest boards for the authenticated user.",
@@ -32,7 +31,6 @@ server.tool(
       });
 
       const boards = response.data.items || [];
-
       const boardsText = boards.length
         ? boards
             .map(
@@ -44,27 +42,14 @@ server.tool(
             .join("\n")
         : "No boards found.";
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: boardsText,
-          },
-        ],
-      };
+      return toText(boardsText);
     } catch (error: any) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `❌ Error fetching boards: ${error.response?.data?.message || error.message}`,
-          },
-        ],
-      };
+      return toText(`❌ Error fetching boards: ${error.response?.data?.message || error.message}`);
     }
   }
 );
-//create board
+
+// ================ TOOL: Create Board ================
 server.tool(
   "create-board",
   "Creates a new Pinterest board.",
@@ -92,82 +77,115 @@ server.tool(
       );
 
       const board = response.data;
-      return {
-        content: [
-          {
-            type: "text",
-            text: `✅ Board "${board.name}" created successfully (ID: ${board.id})`,
-          },
-        ],
-      };
+      return toText(`✅ Board "${board.name}" created successfully (ID: ${board.id})`);
     } catch (error: any) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `❌ Error creating board: ${error.response?.data?.message || error.message}`,
-          },
-        ],
-      };
+      return toText(`❌ Error creating board: ${error.response?.data?.message || error.message}`);
     }
   }
 );
 
-// Delete Pin
-server.tool("delete-pin", "Delete a pin.", {
-  accessToken: z.string(),
-  pinId: z.string(),
-}, async ({ accessToken, pinId }) => {
-  try {
-    await axios.delete(`https://api.pinterest.com/v5/pins/${pinId}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    return { content: toText(`✅ Pin deleted.`) };
-  } catch (err: any) {
-    return { content: toText(`Error deleting pin: ${err.message}`) };
+// ================ TOOL: Delete Board ================
+server.tool(
+  "delete-board",
+  "Delete a board.",
+  {
+    accessToken: z.string(),
+    boardId: z.string(),
+  },
+  async ({ accessToken, boardId }) => {
+    try {
+      await axios.delete(`https://api.pinterest.com/v5/boards/${boardId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      return toText(`🗑️ Deleted board ${boardId}`);
+    } catch (error: any) {
+      return toText(`❌ Error deleting board: ${error.response?.data?.message || error.message}`);
+    }
   }
-});
+);
 
-// Get User Profile
-server.tool("get-user-profile", "Fetch user's profile.", {
-  accessToken: z.string(),
-}, async ({ accessToken }) => {
-  try {
-    const res = await axios.get("https://api.pinterest.com/v5/user_account", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const user = res.data;
-    return { content: toText(`👤 ${user.username}\nName: ${user.profile?.display_name || "N/A"}`) };
-  } catch (err: any) {
-    return { content: toText(`Error fetching profile: ${err.message}`) };
+// ================ TOOL: Delete Pin ================
+server.tool(
+  "delete-pin",
+  "Delete a pin.",
+  {
+    accessToken: z.string(),
+    pinId: z.string(),
+  },
+  async ({ accessToken, pinId }) => {
+    try {
+      await axios.delete(`https://api.pinterest.com/v5/pins/${pinId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      return toText(`✅ Pin deleted.`);
+    } catch (error: any) {
+      return toText(`❌ Error deleting pin: ${error.message}`);
+    }
   }
-});
+);
 
-// Get User Followers
-server.tool("get-user-followers", "Fetch user's followers.", {
-  accessToken: z.string(),
-}, async ({ accessToken }) => {
-  try {
-    const res = await axios.get("https://api.pinterest.com/v5/user_account/followers", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const followers = res.data.items;
-    if (!followers || followers.length === 0) return { content: toText("No followers found.") };
-
-    const followersText = followers.map((f: any) => `👤 ${f.username}`).join("\n");
-    return { content: toText(followersText) };
-  } catch (err: any) {
-    return { content: toText(`Error fetching followers: ${err.message}`) };
+// ================ TOOL: Get User Profile ================
+server.tool(
+  "get-user-profile",
+  "Fetch user's profile.",
+  {
+    accessToken: z.string(),
+  },
+  async ({ accessToken }) => {
+    try {
+      const res = await axios.get("https://api.pinterest.com/v5/user_account", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const user = res.data;
+      return toText(`👤 ${user.username}\nName: ${user.profile?.display_name || "N/A"}`);
+    } catch (err: any) {
+      return toText(`❌ Error fetching profile: ${err.message}`);
+    }
   }
-});
+);
 
+// ================ TOOL: Get User Followers ================
+server.tool(
+  "get-user-followers",
+  "Fetch user's followers.",
+  {
+    accessToken: z.string(),
+  },
+  async ({ accessToken }) => {
+    try {
+      const res = await axios.get("https://api.pinterest.com/v5/user_account/followers", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      const followers = res.data.items;
+      if (!followers || followers.length === 0) return toText("No followers found.");
+
+      const followersText = followers.map((f: any) => `👤 ${f.username}`).join("\n");
+      return toText(followersText);
+    } catch (err: any) {
+      return toText(`❌ Error fetching followers: ${err.message}`);
+    }
+  }
+);
+
+// ================ Helper ================
+function toText(text: string) {
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text,
+        // _meta is optional and can be omitted or included as needed
+      },
+    ],
+  };
+}
 
 // ================ MAIN FUNCTION ================
 async function main() {
   try {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-
     console.log("✅ Pinterest MCP Server connected:", server.isConnected());
   } catch (error: any) {
     console.error("❌ Fatal error in main():", error.message);
