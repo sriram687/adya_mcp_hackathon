@@ -210,4 +210,38 @@ class TwitterMCPServer:
                     text=f"Error executing {name}: {str(e)}"
                 )]
     
-    
+    async def _search_tweets(self, query: str, max_results: int = 10, tweet_fields: List[str] = None) -> Dict:
+        """Search for tweets"""
+        if tweet_fields is None:
+            tweet_fields = ["created_at", "author_id", "public_metrics"]
+        
+        try:
+            tweets = self.twitter_client.search_recent_tweets(
+                query=query,
+                max_results=min(max_results, 100),
+                tweet_fields=tweet_fields
+            )
+            
+            if not tweets.data:
+                return {"message": "No tweets found", "query": query}
+            
+            result = {
+                "query": query,
+                "count": len(tweets.data),
+                "tweets": []
+            }
+            
+            for tweet in tweets.data:
+                tweet_data = {
+                    "id": tweet.id,
+                    "text": tweet.text,
+                    "created_at": str(tweet.created_at) if tweet.created_at else None,
+                    "author_id": tweet.author_id,
+                    "public_metrics": tweet.public_metrics
+                }
+                result["tweets"].append(tweet_data)
+            
+            return result
+            
+        except Exception as e:
+            return {"error": f"Search failed: {str(e)}"}
