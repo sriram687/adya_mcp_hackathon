@@ -602,6 +602,7 @@ if __name__ == "__main__":
                 tweet_fields=args.tweet_fields,
                 expansions=args.expansions
             )
+            
         elif args.command == "get_trending_topics":
             result = await server._get_trending_topics(
                 woeid=args.woeid
