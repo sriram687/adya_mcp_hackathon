@@ -4,6 +4,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
 // ================ SERVER INIT ================
 const server = new McpServer({
@@ -14,6 +16,25 @@ const server = new McpServer({
     resources: {},
   },
 });
+
+// Pinterest OAuth URL generator
+export function getPinterestAuthUrl() {
+  const clientId = process.env.PINTEREST_CLIENT_ID;
+  const redirectUri = encodeURIComponent("http://localhost:3000/oauth/callback");
+  // Scopes needed for all 6 tools: boards:read, boards:write, pins:read, pins:write, user_accounts:read, user_accounts:read_followers
+  const scopes = [
+    "boards:read",
+    "boards:write",
+    "pins:read",
+    "pins:write",
+    "user_accounts:read",
+    "user_accounts:read_followers",
+  ].join(",");
+  const state = "mcp_state";
+  return `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${redirectUri}&client_id=${clientId}&scope=${scopes}&state=${state}`;
+}
+
+console.log("Pinterest OAuth URL:", getPinterestAuthUrl());
 
 // ================ TOOL: Get Boards ================
 server.tool(
@@ -57,16 +78,20 @@ server.tool(
     accessToken: z.string(),
     name: z.string().describe("Name of the new board"),
     description: z.string().optional().describe("Board description"),
-    privacy: z.enum(["PUBLIC", "PROTECTED", "SECRET"]).default("PUBLIC"),
+    privacy: z.string().default("PUBLIC").describe("Board privacy: PUBLIC, PROTECTED, SECRET (PRIVATE will be mapped to SECRET)"),
   },
   async ({ accessToken, name, description, privacy }) => {
+    // Map privacy values for robustness (accepts PRIVATE/SECRET, etc.)
+    let pinterestPrivacy = privacy;
+    if (privacy === "PRIVATE") pinterestPrivacy = "SECRET";
+    if (!['PUBLIC', 'PROTECTED', 'SECRET'].includes(pinterestPrivacy)) pinterestPrivacy = 'PUBLIC';
     try {
       const response = await axios.post(
         "https://api.pinterest.com/v5/boards",
         {
           name,
           description,
-          privacy,
+          privacy: pinterestPrivacy,
         },
         {
           headers: {
