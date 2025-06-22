@@ -20,7 +20,9 @@ const server = new McpServer({
 // Pinterest OAuth URL generator
 export function getPinterestAuthUrl() {
   const clientId = process.env.PINTEREST_CLIENT_ID;
-  const redirectUri = encodeURIComponent("http://localhost:3000/oauth/callback");
+  const redirectUri = encodeURIComponent(
+    "http://localhost:3000/oauth/callback"
+  );
   // Scopes needed for all 6 tools: boards:read, boards:write, pins:read, pins:write, user_accounts:read, user_accounts:read_followers
   const scopes = [
     "boards:read",
@@ -56,7 +58,9 @@ server.tool(
         ? boards
             .map(
               (b: any) =>
-                `📌 Name: ${b.name}\n🆔 ID: ${b.id}\n👤 Owner: ${b.owner?.username}\n📝 Description: ${
+                `📌 Name: ${b.name}\n🆔 ID: ${b.id}\n👤 Owner: ${
+                  b.owner?.username
+                }\n📝 Description: ${
                   b.description || "N/A"
                 }\n---------------------`
             )
@@ -65,7 +69,11 @@ server.tool(
 
       return toText(boardsText);
     } catch (error: any) {
-      return toText(`❌ Error fetching boards: ${error.response?.data?.message || error.message}`);
+      return toText(
+        `❌ Error fetching boards: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   }
 );
@@ -78,13 +86,19 @@ server.tool(
     accessToken: z.string(),
     name: z.string().describe("Name of the new board"),
     description: z.string().optional().describe("Board description"),
-    privacy: z.string().default("PUBLIC").describe("Board privacy: PUBLIC, PROTECTED, SECRET (PRIVATE will be mapped to SECRET)"),
+    privacy: z
+      .string()
+      .default("PUBLIC")
+      .describe(
+        "Board privacy: PUBLIC, PROTECTED, SECRET (PRIVATE will be mapped to SECRET)"
+      ),
   },
   async ({ accessToken, name, description, privacy }) => {
     // Map privacy values for robustness (accepts PRIVATE/SECRET, etc.)
     let pinterestPrivacy = privacy;
     if (privacy === "PRIVATE") pinterestPrivacy = "SECRET";
-    if (!['PUBLIC', 'PROTECTED', 'SECRET'].includes(pinterestPrivacy)) pinterestPrivacy = 'PUBLIC';
+    if (!["PUBLIC", "PROTECTED", "SECRET"].includes(pinterestPrivacy))
+      pinterestPrivacy = "PUBLIC";
     try {
       const response = await axios.post(
         "https://api.pinterest.com/v5/boards",
@@ -102,9 +116,15 @@ server.tool(
       );
 
       const board = response.data;
-      return toText(`✅ Board "${board.name}" created successfully (ID: ${board.id})`);
+      return toText(
+        `✅ Board "${board.name}" created successfully (ID: ${board.id})`
+      );
     } catch (error: any) {
-      return toText(`❌ Error creating board: ${error.response?.data?.message || error.message}`);
+      return toText(
+        `❌ Error creating board: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   }
 );
@@ -124,7 +144,11 @@ server.tool(
       });
       return toText(`🗑️ Deleted board ${boardId}`);
     } catch (error: any) {
-      return toText(`❌ Error deleting board: ${error.response?.data?.message || error.message}`);
+      return toText(
+        `❌ Error deleting board: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   }
 );
@@ -162,7 +186,9 @@ server.tool(
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const user = res.data;
-      return toText(`👤 ${user.username}\nName: ${user.profile?.display_name || "N/A"}`);
+      return toText(
+        `👤 ${user.username}\nName: ${user.profile?.display_name || "N/A"}`
+      );
     } catch (err: any) {
       return toText(`❌ Error fetching profile: ${err.message}`);
     }
@@ -178,14 +204,20 @@ server.tool(
   },
   async ({ accessToken }) => {
     try {
-      const res = await axios.get("https://api.pinterest.com/v5/user_account/followers", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const res = await axios.get(
+        "https://api.pinterest.com/v5/user_account/followers",
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
 
       const followers = res.data.items;
-      if (!followers || followers.length === 0) return toText("No followers found.");
+      if (!followers || followers.length === 0)
+        return toText("No followers found.");
 
-      const followersText = followers.map((f: any) => `👤 ${f.username}`).join("\n");
+      const followersText = followers
+        .map((f: any) => `👤 ${f.username}`)
+        .join("\n");
       return toText(followersText);
     } catch (err: any) {
       return toText(`❌ Error fetching followers: ${err.message}`);
