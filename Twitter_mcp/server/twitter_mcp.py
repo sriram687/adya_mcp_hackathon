@@ -245,3 +245,43 @@ class TwitterMCPServer:
             
         except Exception as e:
             return {"error": f"Search failed: {str(e)}"}
+        
+      async def _get_user_tweets(self, username: str, max_results: int = 10, exclude: List[str] = None) -> Dict:
+        """Get tweets from a specific user"""
+        try:
+            # First get user by username
+            user = self.twitter_client.get_user(username=username)
+            if not user.data:
+                return {"error": f"User {username} not found"}
+            
+            # Get user's tweets
+            tweets = self.twitter_client.get_users_tweets(
+                id=user.data.id,
+                max_results=min(max_results, 100),
+                exclude=exclude,
+                tweet_fields=["created_at", "public_metrics"]
+            )
+            
+            if not tweets.data:
+                return {"message": f"No tweets found for @{username}"}
+            
+            result = {
+                "username": username,
+                "user_id": user.data.id,
+                "count": len(tweets.data),
+                "tweets": []
+            }
+            
+            for tweet in tweets.data:
+                tweet_data = {
+                    "id": tweet.id,
+                    "text": tweet.text,
+                    "created_at": str(tweet.created_at) if tweet.created_at else None,
+                    "public_metrics": tweet.public_metrics
+                }
+                result["tweets"].append(tweet_data)
+            
+            return result
+            
+        except Exception as e:
+            return {"error": f"Failed to get user tweets: {str(e)}"}
