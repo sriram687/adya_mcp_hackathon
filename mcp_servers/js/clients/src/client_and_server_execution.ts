@@ -907,6 +907,7 @@ async function CallAndExecuteTool(selected_server:any, server_credentials:any,to
         case "PINTEREST":
             args.accessToken = server_credentials[selected_server]?.accessToken || server_credentials[selected_server]?.access_token || "";
             break;
+
         default:
             break;
     }

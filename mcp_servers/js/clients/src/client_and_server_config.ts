@@ -15,6 +15,6 @@ export const ServersConfig: any = [
     server_name: "PINTEREST", // Pinterest build
     server_features_and_capability: "PINTEREST",
     path: "build/index.js", // same structure
-  },
+  }
 ];
 
