@@ -71,6 +71,130 @@ async function makeWaybackRequest<T>({
   }
 }
 
+// Enhanced date parser for various formats
+function parseFlexibleDate(dateStr: string, isEndDate: boolean = false): string {
+  if (!dateStr) return '';
+  
+  // Remove extra spaces and normalize
+  const cleanStr = dateStr.trim().toLowerCase();
+  
+  // Handle ranges like "2021-2025" or "2021 to 2025"
+  const rangeMatch = cleanStr.match(/(\d{4})\s*(?:[-–—]|to)\s*(\d{4})/);
+  if (rangeMatch) {
+    const [, startYear, endYear] = rangeMatch;
+    return isEndDate ? `${endYear}1231` : `${startYear}0101`;
+  }
+  
+  // Handle single year like "2021"
+  if (/^\d{4}$/.test(cleanStr)) {
+    return isEndDate ? `${cleanStr}1231` : `${cleanStr}0101`;
+  }
+  
+  // Handle already formatted YYYYMMDD or YYYYMMDDHHMMSS
+  if (/^\d{8}(\d{6})?$/.test(cleanStr)) {
+    return cleanStr.substring(0, 8);
+  }
+  
+  // Handle ISO dates like "2021-01-01"
+  const isoMatch = cleanStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    return `${year}${month.padStart(2, '0')}${day.padStart(2, '0')}`;
+  }
+  
+  // Handle month names with various formats
+  const monthNames = {
+    'jan': '01', 'january': '01',
+    'feb': '02', 'february': '02',
+    'mar': '03', 'march': '03',
+    'apr': '04', 'april': '04',
+    'may': '05',
+    'jun': '06', 'june': '06',
+    'jul': '07', 'july': '07',
+    'aug': '08', 'august': '08',
+    'sep': '09', 'september': '09',
+    'oct': '10', 'october': '10',
+    'nov': '11', 'november': '11',
+    'dec': '12', 'december': '12'
+  };
+  
+  // Handle formats like "Jan 1 2025", "January 1, 2025", "1 Jan 2025"
+  const monthNameMatch = cleanStr.match(/(?:(\d{1,2})\s+)?(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|september|oct|october|nov|november|dec|december)\s+(\d{1,2}),?\s+(\d{4})/);
+  if (monthNameMatch) {
+    const [, dayPrefix, monthName, day, year] = monthNameMatch;
+    const actualDay = dayPrefix || day;
+    const monthNum = monthNames[monthName as keyof typeof monthNames];
+    return `${year}${monthNum}${actualDay.padStart(2, '0')}`;
+  }
+  
+  // Handle formats like "Jan 2025", "January 2025"
+  const monthYearMatch = cleanStr.match(/(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|september|oct|october|nov|november|dec|december)\s+(\d{4})/);
+  if (monthYearMatch) {
+    const [, monthName, year] = monthYearMatch;
+    const monthNum = monthNames[monthName as keyof typeof monthNames];
+    return isEndDate ? `${year}${monthNum}31` : `${year}${monthNum}01`;
+  }
+  
+  // Handle formats like "2025 Jan", "2025 January"
+  const yearMonthMatch = cleanStr.match(/(\d{4})\s+(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|september|oct|october|nov|november|dec|december)/);
+  if (yearMonthMatch) {
+    const [, year, monthName] = yearMonthMatch;
+    const monthNum = monthNames[monthName as keyof typeof monthNames];
+    return isEndDate ? `${year}${monthNum}31` : `${year}${monthNum}01`;
+  }
+  
+  // Handle MM/DD/YYYY or DD/MM/YYYY formats (assume MM/DD/YYYY for US format)
+  const slashMatch = cleanStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (slashMatch) {
+    const [, part1, part2, year] = slashMatch;
+    // Assume MM/DD/YYYY format
+    const month = part1.padStart(2, '0');
+    const day = part2.padStart(2, '0');
+    return `${year}${month}${day}`;
+  }
+  
+  // Handle relative terms
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
+  const currentDay = now.getDate().toString().padStart(2, '0');
+  
+  if (cleanStr.includes('today') || cleanStr.includes('now')) {
+    return `${currentYear}${currentMonth}${currentDay}`;
+  }
+  
+  if (cleanStr.includes('yesterday')) {
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    return `${yesterday.getFullYear()}${(yesterday.getMonth() + 1).toString().padStart(2, '0')}${yesterday.getDate().toString().padStart(2, '0')}`;
+  }
+  
+  if (cleanStr.includes('last year')) {
+    const lastYear = currentYear - 1;
+    return isEndDate ? `${lastYear}1231` : `${lastYear}0101`;
+  }
+  
+  if (cleanStr.includes('this year')) {
+    return isEndDate ? `${currentYear}1231` : `${currentYear}0101`;
+  }
+  
+  // If nothing matches, try to parse as a regular date
+  try {
+    const parsedDate = new Date(dateStr);
+    if (!isNaN(parsedDate.getTime())) {
+      const year = parsedDate.getFullYear();
+      const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
+      const day = parsedDate.getDate().toString().padStart(2, '0');
+      return `${year}${month}${day}`;
+    }
+  } catch (e) {
+    // Ignore parsing errors
+  }
+  
+  // Return empty string if no format matches
+  return '';
+}
+
 console.log("✅ Wayback Machine MCP Server initialized");
 
 // ================ WAYBACK MACHINE TOOLS ================
@@ -80,12 +204,15 @@ server.tool(
   "Fetches available snapshots from the Wayback Machine for a given URL",
   {
     url: z.string().url().describe("The URL to look up in the Wayback Machine"),
-    timestamp: z.string().optional().describe("Specific timestamp to look for (YYYYMMDDHHMMSS format)"),
+    timestamp: z.string().optional().describe("Specific timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp }) => {
     try {
       const params: Record<string, any> = { url };
-      if (timestamp) params.timestamp = timestamp;
+      if (timestamp) {
+        const parsedTimestamp = parseFlexibleDate(timestamp);
+        if (parsedTimestamp) params.timestamp = parsedTimestamp;
+      }
 
       const response = await makeWaybackRequest<{
         archived_snapshots: {
@@ -144,8 +271,8 @@ server.tool(
   "Search the complete history of snapshots for a URL in the Wayback Machine",
   {
     url: z.string().url().describe("The URL to search for in the Wayback Machine"),
-    from: z.string().optional().describe("Start date for search (YYYYMMDD format)"),
-    to: z.string().optional().describe("End date for search (YYYYMMDD format)"),
+    from: z.string().optional().describe("Start date for search (flexible format: 'Jan 1 2025', '2021', '2021-2025', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'last year', etc.)"),
+    to: z.string().optional().describe("End date for search (flexible format: 'Jan 1 2025', '2021', '2021-2025', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
     limit: z.number().min(1).max(1000).optional().default(100).describe("Maximum number of results to return"),
     filter: z.enum(["statuscode:200", "mimetype:text/html", "original"]).optional().describe("Filter results"),
   },
@@ -158,8 +285,8 @@ server.tool(
         limit,
       };
       
-      if (from) params.from = from;
-      if (to) params.to = to;
+      if (from) params.from = parseFlexibleDate(from);
+      if (to) params.to = parseFlexibleDate(to, true);
       if (filter) params.filter = filter;
 
       const response = await makeWaybackRequest<WaybackSearchResult[]>({
@@ -379,24 +506,37 @@ server.tool(
   "Compare two different archived versions of the same URL",
   {
     url: z.string().url().describe("The URL to compare versions for"),
-    timestamp1: z.string().describe("First timestamp to compare (YYYYMMDD or YYYYMMDDHHMMSS format)"),
-    timestamp2: z.string().describe("Second timestamp to compare (YYYYMMDD or YYYYMMDDHHMMSS format)"),
+    timestamp1: z.string().describe("First timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
+    timestamp2: z.string().describe("Second timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp1, timestamp2 }) => {
     try {
+      // Parse flexible timestamps
+      const parsedTimestamp1 = parseFlexibleDate(timestamp1);
+      const parsedTimestamp2 = parseFlexibleDate(timestamp2);
+      
+      if (!parsedTimestamp1 || !parsedTimestamp2) {
+        return {
+          content: [{
+            type: "text",
+            text: `❌ Could not parse timestamps. Please provide valid dates like 'Jan 1 2025', '2021', 'YYYYMMDD', etc.`
+          }]
+        };
+      }
+      
       // Get snapshots for both timestamps
       const snapshot1Response = await makeWaybackRequest<{
         archived_snapshots: { closest?: WaybackSnapshot };
       }>({
         endpoint: "https://archive.org/wayback/available",
-        params: { url, timestamp: timestamp1 },
+        params: { url, timestamp: parsedTimestamp1 },
       });
 
       const snapshot2Response = await makeWaybackRequest<{
         archived_snapshots: { closest?: WaybackSnapshot };
       }>({
         endpoint: "https://archive.org/wayback/available",
-        params: { url, timestamp: timestamp2 },
+        params: { url, timestamp: parsedTimestamp2 },
       });
 
       const snap1 = snapshot1Response.archived_snapshots?.closest;
@@ -407,8 +547,8 @@ server.tool(
           content: [{
             type: "text",
             text: `❌ Could not find snapshots for comparison:\n` +
-              `Snapshot 1 (${timestamp1}): ${snap1 ? 'Found' : 'Not found'}\n` +
-              `Snapshot 2 (${timestamp2}): ${snap2 ? 'Found' : 'Not found'}`
+              `Snapshot 1 (${timestamp1} → ${parsedTimestamp1}): ${snap1 ? 'Found' : 'Not found'}\n` +
+              `Snapshot 2 (${timestamp2} → ${parsedTimestamp2}): ${snap2 ? 'Found' : 'Not found'}`
           }]
         };
       }
@@ -467,12 +607,15 @@ server.tool(
   "Fetch closest available snapshot for a URL (alias for get-wayback-snapshots)",
   {
     url: z.string().url().describe("The URL to look up"),
-    timestamp: z.string().optional().describe("Specific timestamp (YYYYMMDDHHMMSS format)"),
+    timestamp: z.string().optional().describe("Specific timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp }) => {
     // Reuse existing get-wayback-snapshots implementation
     const params: Record<string, any> = { url };
-    if (timestamp) params.timestamp = timestamp;
+    if (timestamp) {
+      const parsedTimestamp = parseFlexibleDate(timestamp);
+      if (parsedTimestamp) params.timestamp = parsedTimestamp;
+    }
 
     try {
       const response = await makeWaybackRequest<{
@@ -567,14 +710,24 @@ server.tool(
   "Fetch and preview raw HTML of a snapshot",
   {
     url: z.string().url().describe("The URL to get archived content for"),
-    timestamp: z.string().optional().describe("Specific timestamp (YYYYMMDDHHMMSS format)"),
+    timestamp: z.string().optional().describe("Specific timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp }) => {
     try {
       let archiveUrl: string;
       
       if (timestamp) {
-        archiveUrl = `https://web.archive.org/web/${timestamp}/${url}`;
+        const parsedTimestamp = parseFlexibleDate(timestamp);
+        if (parsedTimestamp) {
+          archiveUrl = `https://web.archive.org/web/${parsedTimestamp}/${url}`;
+        } else {
+          return {
+            content: [{
+              type: "text",
+              text: `❌ Could not parse timestamp: ${timestamp}. Please provide a valid date format.`
+            }]
+          };
+        }
       } else {
         // Get latest snapshot first
         const response = await makeWaybackRequest<{
@@ -676,13 +829,25 @@ server.tool(
   "Text difference summary between two archived versions",
   {
     url: z.string().url().describe("The URL to compare"),
-    timestamp1: z.string().describe("First timestamp"),
-    timestamp2: z.string().describe("Second timestamp"),
+    timestamp1: z.string().describe("First timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
+    timestamp2: z.string().describe("Second timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp1, timestamp2 }) => {
     try {
-      const url1 = `https://web.archive.org/web/${timestamp1}/${url}`;
-      const url2 = `https://web.archive.org/web/${timestamp2}/${url}`;
+      const parsedTimestamp1 = parseFlexibleDate(timestamp1);
+      const parsedTimestamp2 = parseFlexibleDate(timestamp2);
+      
+      if (!parsedTimestamp1 || !parsedTimestamp2) {
+        return {
+          content: [{
+            type: "text",
+            text: `❌ Could not parse timestamps. Please provide valid dates.`
+          }]
+        };
+      }
+      
+      const url1 = `https://web.archive.org/web/${parsedTimestamp1}/${url}`;
+      const url2 = `https://web.archive.org/web/${parsedTimestamp2}/${url}`;
 
       const [response1, response2] = await Promise.all([
         axios.get(url1, { timeout: 30000, maxContentLength: 512 * 1024 }),
@@ -721,17 +886,29 @@ server.tool(
   "Compare size/length (bytes) of two archived versions",
   {
     url: z.string().url().describe("The URL to compare"),
-    timestamp1: z.string().describe("First timestamp"),
-    timestamp2: z.string().describe("Second timestamp"),
+    timestamp1: z.string().describe("First timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
+    timestamp2: z.string().describe("Second timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp1, timestamp2 }) => {
     try {
+      const parsedTimestamp1 = parseFlexibleDate(timestamp1);
+      const parsedTimestamp2 = parseFlexibleDate(timestamp2);
+      
+      if (!parsedTimestamp1 || !parsedTimestamp2) {
+        return {
+          content: [{
+            type: "text",
+            text: `❌ Could not parse timestamps. Please provide valid dates.`
+          }]
+        };
+      }
+      
       const response = await makeWaybackRequest<WaybackSearchResult[]>({
         endpoint: "https://web.archive.org/cdx/search/cdx",
         params: {
           url,
           output: "json",
-          filter: `timestamp:${timestamp1}|${timestamp2}`
+          filter: `timestamp:${parsedTimestamp1}|${parsedTimestamp2}`
         },
       });
 
@@ -745,8 +922,8 @@ server.tool(
       }
 
       const snapshots = response.slice(1);
-      const snap1 = snapshots.find((s: any) => s[1].startsWith(timestamp1.substring(0, 8)));
-      const snap2 = snapshots.find((s: any) => s[1].startsWith(timestamp2.substring(0, 8)));
+      const snap1 = snapshots.find((s: any) => s[1].startsWith(parsedTimestamp1.substring(0, 8)));
+      const snap2 = snapshots.find((s: any) => s[1].startsWith(parsedTimestamp2.substring(0, 8)));
       
       if (!snap1 || !snap2) {
         return {
@@ -873,18 +1050,27 @@ server.tool(
   "Return headers, content-type, size, etc. for snapshot",
   {
     url: z.string().url().describe("The URL to get metadata for"),
-    timestamp: z.string().optional().describe("Specific timestamp"),
+    timestamp: z.string().optional().describe("Specific timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp }) => {
     try {
+      const params: Record<string, any> = {
+        url,
+        output: "json",
+        limit: 1,
+      };
+      
+      if (timestamp) {
+        const parsedTimestamp = parseFlexibleDate(timestamp);
+        if (parsedTimestamp) {
+          params.from = parsedTimestamp;
+          params.to = parsedTimestamp;
+        }
+      }
+      
       const response = await makeWaybackRequest<WaybackSearchResult[]>({
         endpoint: "https://web.archive.org/cdx/search/cdx",
-        params: {
-          url,
-          output: "json",
-          limit: 1,
-          ...(timestamp && { from: timestamp, to: timestamp })
-        },
+        params,
       });
 
       if (!Array.isArray(response) || response.length <= 1) {
@@ -1124,14 +1310,24 @@ server.tool(
   "Extract only visible <body> text for readability",
   {
     url: z.string().url().describe("The URL to extract text from"),
-    timestamp: z.string().optional().describe("Specific timestamp"),
+    timestamp: z.string().optional().describe("Specific timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp }) => {
     try {
       let archiveUrl: string;
       
       if (timestamp) {
-        archiveUrl = `https://web.archive.org/web/${timestamp}/${url}`;
+        const parsedTimestamp = parseFlexibleDate(timestamp);
+        if (parsedTimestamp) {
+          archiveUrl = `https://web.archive.org/web/${parsedTimestamp}/${url}`;
+        } else {
+          return {
+            content: [{
+              type: "text",
+              text: `❌ Could not parse timestamp: ${timestamp}. Please provide a valid date format.`
+            }]
+          };
+        }
       } else {
         const response = await makeWaybackRequest<{
           archived_snapshots: { closest?: WaybackSnapshot };
@@ -1555,14 +1751,24 @@ server.tool(
   "Show original-to-final redirects stored in snapshot metadata",
   {
     url: z.string().url().describe("The URL to check redirects for"),
-    timestamp: z.string().optional().describe("Specific timestamp"),
+    timestamp: z.string().optional().describe("Specific timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
   },
   async ({ url, timestamp }) => {
     try {
       let archiveUrl: string;
       
       if (timestamp) {
-        archiveUrl = `https://web.archive.org/web/${timestamp}/${url}`;
+        const parsedTimestamp = parseFlexibleDate(timestamp);
+        if (parsedTimestamp) {
+          archiveUrl = `https://web.archive.org/web/${parsedTimestamp}/${url}`;
+        } else {
+          return {
+            content: [{
+              type: "text",
+              text: `❌ Could not parse timestamp: ${timestamp}. Please provide a valid date format.`
+            }]
+          };
+        }
       } else {
         const response = await makeWaybackRequest<{
           archived_snapshots: { closest?: WaybackSnapshot };
@@ -1624,7 +1830,7 @@ server.tool(
   "Extract all hyperlinks from an archived page",
   {
     url: z.string().url().describe("The URL to extract links from"),
-    timestamp: z.string().optional().describe("Specific timestamp"),
+    timestamp: z.string().optional().describe("Specific timestamp (flexible format: 'Jan 1 2025', '2021', 'YYYYMMDD', 'YYYY-MM-DD', 'MM/DD/YYYY', 'January 2025', 'today', etc.)"),
     limit: z.number().min(1).max(100).optional().default(50).describe("Max links to return"),
   },
   async ({ url, timestamp, limit }) => {
@@ -1632,7 +1838,17 @@ server.tool(
       let archiveUrl: string;
       
       if (timestamp) {
-        archiveUrl = `https://web.archive.org/web/${timestamp}/${url}`;
+        const parsedTimestamp = parseFlexibleDate(timestamp);
+        if (parsedTimestamp) {
+          archiveUrl = `https://web.archive.org/web/${parsedTimestamp}/${url}`;
+        } else {
+          return {
+            content: [{
+              type: "text",
+              text: `❌ Could not parse timestamp: ${timestamp}. Please provide a valid date format.`
+            }]
+          };
+        }
       } else {
         const response = await makeWaybackRequest<{
           archived_snapshots: { closest?: WaybackSnapshot };
