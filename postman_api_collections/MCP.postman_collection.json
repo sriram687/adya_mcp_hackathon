@@ -284,6 +284,156 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "MAKE",
+					"item": [
+						{
+							"name": "List Organizations",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"selected_server_credentials\": {\r\n        \"MAKE\": {\r\n            \"apiToken\": \"YOUR_MAKE_API_TOKEN_HERE\"\r\n        }\r\n    },\r\n    \"client_details\": {\r\n        \"api_key\": \"YOUR_GEMINI_API_KEY\",\r\n        \"temperature\": 0.1,\r\n        \"max_token\": 20000,\r\n        \"input\": \"Show me all my Make.com organizations\",\r\n        \"input_type\": \"text\",\r\n        \"prompt\": \"you are a helpful assistant\",\r\n        \"chat_model\": \"gemini-2.0-flash-lite\",\r\n        \"chat_history\": [\r\n            {\r\n                \"role\": \"user\",\r\n                \"content\": \"Hi\"\r\n            }\r\n        ]\r\n    },\r\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\r\n    \"selected_servers\": [\r\n        \"MAKE\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+									"host": [
+										"{{dev-js-host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"mcp",
+										"process_message"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Scenarios",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"selected_server_credentials\": {\r\n        \"MAKE\": {\r\n            \"apiToken\": \"YOUR_MAKE_API_TOKEN_HERE\"\r\n        }\r\n    },\r\n    \"client_details\": {\r\n        \"api_key\": \"YOUR_GEMINI_API_KEY\",\r\n        \"temperature\": 0.1,\r\n        \"max_token\": 20000,\r\n        \"input\": \"Show me all my automation scenarios in organization 12345\",\r\n        \"input_type\": \"text\",\r\n        \"prompt\": \"you are a helpful assistant\",\r\n        \"chat_model\": \"gemini-2.0-flash-lite\",\r\n        \"chat_history\": [\r\n            {\r\n                \"role\": \"user\",\r\n                \"content\": \"Hi\"\r\n            }\r\n        ]\r\n    },\r\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\r\n    \"selected_servers\": [\r\n        \"MAKE\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+									"host": [
+										"{{dev-js-host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"mcp",
+										"process_message"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Run Scenario",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"selected_server_credentials\": {\r\n        \"MAKE\": {\r\n            \"apiToken\": \"YOUR_MAKE_API_TOKEN_HERE\"\r\n        }\r\n    },\r\n    \"client_details\": {\r\n        \"api_key\": \"YOUR_GEMINI_API_KEY\",\r\n        \"temperature\": 0.1,\r\n        \"max_token\": 20000,\r\n        \"input\": \"Run my email automation scenario with ID 67890 in organization 12345\",\r\n        \"input_type\": \"text\",\r\n        \"prompt\": \"you are a helpful assistant\",\r\n        \"chat_model\": \"gemini-2.0-flash-lite\",\r\n        \"chat_history\": [\r\n            {\r\n                \"role\": \"user\",\r\n                \"content\": \"Hi\"\r\n            }\r\n        ]\r\n    },\r\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\r\n    \"selected_servers\": [\r\n        \"MAKE\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+									"host": [
+										"{{dev-js-host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"mcp",
+										"process_message"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Monitor Executions",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"selected_server_credentials\": {\r\n        \"MAKE\": {\r\n            \"apiToken\": \"YOUR_MAKE_API_TOKEN_HERE\"\r\n        }\r\n    },\r\n    \"client_details\": {\r\n        \"api_key\": \"YOUR_GEMINI_API_KEY\",\r\n        \"temperature\": 0.1,\r\n        \"max_token\": 20000,\r\n        \"input\": \"Show me the recent execution history for scenario 67890 in organization 12345\",\r\n        \"input_type\": \"text\",\r\n        \"prompt\": \"you are a helpful assistant\",\r\n        \"chat_model\": \"gemini-2.0-flash-lite\",\r\n        \"chat_history\": [\r\n            {\r\n                \"role\": \"user\",\r\n                \"content\": \"Hi\"\r\n            }\r\n        ]\r\n    },\r\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\r\n    \"selected_servers\": [\r\n        \"MAKE\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+									"host": [
+										"{{dev-js-host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"mcp",
+										"process_message"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Start/Stop Scenarios",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"selected_server_credentials\": {\r\n        \"MAKE\": {\r\n            \"apiToken\": \"YOUR_MAKE_API_TOKEN_HERE\"\r\n        }\r\n    },\r\n    \"client_details\": {\r\n        \"api_key\": \"YOUR_GEMINI_API_KEY\",\r\n        \"temperature\": 0.1,\r\n        \"max_token\": 20000,\r\n        \"input\": \"Turn off my daily backup scenario with ID 67890 in organization 12345\",\r\n        \"input_type\": \"text\",\r\n        \"prompt\": \"you are a helpful assistant\",\r\n        \"chat_model\": \"gemini-2.0-flash-lite\",\r\n        \"chat_history\": [\r\n            {\r\n                \"role\": \"user\",\r\n                \"content\": \"Hi\"\r\n            }\r\n        ]\r\n    },\r\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\r\n    \"selected_servers\": [\r\n        \"MAKE\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+									"host": [
+										"{{dev-js-host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"mcp",
+										"process_message"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		}
