@@ -4,6 +4,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
 // ================ SERVER INIT ================
 const server = new McpServer({
@@ -14,6 +16,27 @@ const server = new McpServer({
     resources: {},
   },
 });
+
+// Pinterest OAuth URL generator
+export function getPinterestAuthUrl() {
+  const clientId = process.env.PINTEREST_CLIENT_ID;
+  const redirectUri = encodeURIComponent(
+    "http://localhost:3000/oauth/callback"
+  );
+  // Scopes needed for all 6 tools: boards:read, boards:write, pins:read, pins:write, user_accounts:read, user_accounts:read_followers
+  const scopes = [
+    "boards:read",
+    "boards:write",
+    "pins:read",
+    "pins:write",
+    "user_accounts:read",
+    "user_accounts:read_followers",
+  ].join(",");
+  const state = "mcp_state";
+  return `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${redirectUri}&client_id=${clientId}&scope=${scopes}&state=${state}`;
+}
+
+console.log("Pinterest OAuth URL:", getPinterestAuthUrl());
 
 // ================ TOOL: Get Boards ================
 server.tool(
@@ -31,25 +54,31 @@ server.tool(
       });
 
       const boards = response.data.items || [];
+
       const boardsText = boards.length
         ? boards
             .map(
               (b: any) =>
-                `📌 Name: ${b.name}\n🆔 ID: ${b.id}\n👤 Owner: ${b.owner?.username}\n📝 Description: ${
-                  b.description || "N/A"
-                }\n---------------------`
+                `📌 Name       : ${b.name}\n` +
+                `🆔 ID         : ${b.id}\n` +
+                `👤 Owner      : ${b.owner?.username || "N/A"}\n` +
+                `📝 Description: ${b.description || "N/A"}\n`
             )
             .join("\n")
         : "No boards found.";
 
       return toText(boardsText);
     } catch (error: any) {
-      return toText(`❌ Error fetching boards: ${error.response?.data?.message || error.message}`);
+      return toText(
+        `❌ Error fetching boards: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   }
 );
 
-// ================ TOOL: Create Board ================
+// =================TOOL: Create Board ================
 server.tool(
   "create-board",
   "Creates a new Pinterest board.",
@@ -57,16 +86,50 @@ server.tool(
     accessToken: z.string(),
     name: z.string().describe("Name of the new board"),
     description: z.string().optional().describe("Board description"),
-    privacy: z.enum(["PUBLIC", "PROTECTED", "SECRET"]).default("PUBLIC"),
+    privacy: z
+      .string()
+      .default("PUBLIC")
+      .describe(
+        "Board privacy: PUBLIC, PROTECTED, SECRET (PRIVATE will be mapped to SECRET)"
+      ),
   },
   async ({ accessToken, name, description, privacy }) => {
+    let pinterestPrivacy = privacy === "PRIVATE" ? "SECRET" : privacy;
+    if (!["PUBLIC", "PROTECTED", "SECRET"].includes(pinterestPrivacy)) {
+      pinterestPrivacy = "PUBLIC";
+    }
+
     try {
+      const existingBoards = await axios.get(
+        "https://api.pinterest.com/v5/boards",
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      const match = existingBoards.data.items?.find(
+        (b: any) => b.name.toLowerCase() === name.toLowerCase()
+      );
+
+      if (match) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `⚠️ Board "${match.name}" already exists (ID: ${match.id}).`,
+            },
+          ],
+
+          stop: true,
+        };
+      }
+
       const response = await axios.post(
         "https://api.pinterest.com/v5/boards",
         {
           name,
           description,
-          privacy,
+          privacy: pinterestPrivacy,
         },
         {
           headers: {
@@ -77,14 +140,39 @@ server.tool(
       );
 
       const board = response.data;
-      return toText(`✅ Board "${board.name}" created successfully (ID: ${board.id})`);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              success: true,
+              message: `✅ Board "${board.name}" created successfully`,
+              id: board.id,
+              name: board.name,
+            }),
+          },
+        ],
+        stop: true,
+      };
     } catch (error: any) {
-      return toText(`❌ Error creating board: ${error.response?.data?.message || error.message}`);
+      return {
+        content: [
+          {
+            type: "text",
+            text:
+              `❌ Error creating board: ` +
+              (error.response?.data?.message || error.message),
+          },
+        ],
+        stop: true,
+      };
     }
   }
 );
 
 // ================ TOOL: Delete Board ================
+const deletedBoards = new Set<string>(); // runtime in-memory cache
+
 server.tool(
   "delete-board",
   "Delete a board.",
@@ -93,13 +181,28 @@ server.tool(
     boardId: z.string(),
   },
   async ({ accessToken, boardId }) => {
+    // ✅ Prevent accidental retries
+    if (deletedBoards.has(boardId)) {
+      return toText(`⚠️ Board ${boardId} was already deleted (cached).`);
+    }
+
     try {
       await axios.delete(`https://api.pinterest.com/v5/boards/${boardId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+
+      deletedBoards.add(boardId); // ✅ Mark as deleted
       return toText(`🗑️ Deleted board ${boardId}`);
     } catch (error: any) {
-      return toText(`❌ Error deleting board: ${error.response?.data?.message || error.message}`);
+      const message = error.response?.data?.message || error.message;
+
+      // 🔁 Catch repeated delete error (e.g., "Board not found")
+      if (message.includes("Board not found")) {
+        deletedBoards.add(boardId); // Still mark to avoid retries
+        return toText(`⚠️ Board ${boardId} already deleted or not found.`);
+      }
+
+      return toText(`❌ Error deleting board: ${message}`);
     }
   }
 );
@@ -124,46 +227,215 @@ server.tool(
   }
 );
 
-// ================ TOOL: Get User Profile ================
+// ================ TOOL: Create Pins ================ not possible with trial access
 server.tool(
-  "get-user-profile",
-  "Fetch user's profile.",
+  "create-pin",
+  "Creates a new Pinterest pin on a specific board using base64 image.",
   {
     accessToken: z.string(),
+    boardId: z.string(),
+    title: z.string(),
+    description: z.string().optional(),
+    alt_text: z.string().optional(),
+    link: z.string().url().optional(),
+    image_data: z.string(), // base64 with prefix
   },
-  async ({ accessToken }) => {
+  async ({
+    accessToken,
+    boardId,
+    title,
+    description,
+    alt_text,
+    link,
+    image_data,
+  }) => {
     try {
-      const res = await axios.get("https://api.pinterest.com/v5/user_account", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const user = res.data;
-      return toText(`👤 ${user.username}\nName: ${user.profile?.display_name || "N/A"}`);
-    } catch (err: any) {
-      return toText(`❌ Error fetching profile: ${err.message}`);
+      const response = await axios.post(
+        "https://api.pinterest.com/v5/pins",
+        {
+          board_id: boardId,
+          title,
+          description,
+          alt_text,
+          link,
+          media_source: {
+            source_type: "base64",
+            content_type: "image/jpeg",
+            data: image_data.split(",")[1], // remove prefix
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const pin = response.data;
+      return toText(
+        `📌 Pin "${pin.title}" created successfully on board ${boardId}!\n🆔 Pin ID: ${pin.id}`
+      );
+    } catch (error: any) {
+      return toText(
+        `❌ Error creating pin: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+);
+//================ TOOL: Create Pins -url ================ not possible with trial access
+server.tool(
+  "create-pin-url",
+  "Creates a pin using a public image URL.",
+  {
+    accessToken: z.string(),
+    boardId: z.string(),
+    title: z.string(),
+    description: z.string().optional(),
+    alt_text: z.string().optional(),
+    link: z.string().url().optional(),
+    media_url: z.string().url(),
+  },
+  async ({
+    accessToken,
+    boardId,
+    title,
+    description,
+    alt_text,
+    link,
+    media_url,
+  }) => {
+    try {
+      const response = await axios.post(
+        "https://api.pinterest.com/v5/pins",
+        {
+          board_id: boardId,
+          title,
+          description,
+          alt_text,
+          link,
+          media_source: {
+            source_type: "image_url",
+            url: media_url,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const pin = response.data;
+      return toText(
+        `📌 Pin "${pin.title}" created successfully on board ${boardId}!\n🆔 Pin ID: ${pin.id}`
+      );
+    } catch (error: any) {
+      return toText(
+        `❌ Error creating pin: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   }
 );
 
-// ================ TOOL: Get User Followers ================
+//================== SANDBOX TOOLS ==================
+// Note: These tools are for the Pinterest Sandbox environment, which is separate from the production API
+
+// ================ TOOL: Create Sandbox Board ================
 server.tool(
-  "get-user-followers",
-  "Fetch user's followers.",
+  "create-sandbox-board",
+  "Creates a new Pinterest sandbox board.",
   {
     accessToken: z.string(),
+    name: z.string().describe("Name of the new board"),
+    description: z.string().optional().describe("Board description"),
+    privacy: z
+      .string()
+      .default("PUBLIC")
+      .describe(
+        "Board privacy: PUBLIC, PROTECTED, SECRET (PRIVATE will be mapped to SECRET)"
+      ),
+  },
+  async ({ accessToken, name, description, privacy }) => {
+    // Map privacy values for robustness (accepts PRIVATE/SECRET, etc.)
+    let pinterestPrivacy = privacy;
+    if (privacy === "PRIVATE") pinterestPrivacy = "SECRET";
+    if (!["PUBLIC", "PROTECTED", "SECRET"].includes(pinterestPrivacy))
+      pinterestPrivacy = "PUBLIC";
+    try {
+      const response = await axios.post(
+        "https://api-sandbox.pinterest.com/v5/boards",
+        {
+          name,
+          description,
+          privacy: pinterestPrivacy,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const board = response.data;
+      return toText(
+        `✅ Board "${board.name}" created successfully (ID: ${board.id})`
+      );
+    } catch (error: any) {
+      return toText(
+        `❌ Error creating board: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+);
+//================= TOOL: Get Sandbox Boards =================
+server.tool(
+  "get-sandbox-boards",
+  "Fetches boards from the Pinterest Sandbox environment.",
+  {
+    accessToken: z.string().describe("Pinterest Sandbox Access Token"),
   },
   async ({ accessToken }) => {
     try {
-      const res = await axios.get("https://api.pinterest.com/v5/user_account/followers", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const response = await axios.get(
+        "https://api-sandbox.pinterest.com/v5/boards",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      const followers = res.data.items;
-      if (!followers || followers.length === 0) return toText("No followers found.");
+      const boards = response.data.items || [];
 
-      const followersText = followers.map((f: any) => `👤 ${f.username}`).join("\n");
-      return toText(followersText);
-    } catch (err: any) {
-      return toText(`❌ Error fetching followers: ${err.message}`);
+      if (boards.length === 0) {
+        return toText("📂 No boards found in your sandbox environment.");
+      }
+
+      const boardList = boards
+        .map((b: any) => `📌 ${b.name} (ID: ${b.id})`)
+        .join("\n");
+
+      return toText(
+        `✅ Found ${boards.length} board(s) in sandbox:\n\n${boardList}`
+      );
+    } catch (error: any) {
+      console.error(
+        "Sandbox Boards Error:",
+        error?.response?.data || error.message
+      );
+      return toText(
+        "❌ Failed to fetch sandbox boards. Please check your access token and try again."
+      );
     }
   }
 );

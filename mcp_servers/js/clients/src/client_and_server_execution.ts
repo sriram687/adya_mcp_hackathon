@@ -905,8 +905,14 @@ async function CallAndExecuteTool(selected_server:any, server_credentials:any,to
             }
             break;
         case "PINTEREST":
-            args.accessToken = server_credentials[selected_server]?.access_token || server_credentials[selected_server]?.accessToken || "";
+            args.accessToken = server_credentials[selected_server]?.accessToken || server_credentials[selected_server]?.access_token || "";
             break;
+        case "WAYBACK":
+            // Wayback Machine doesn't require credentials for basic operations
+            // All tools work with public API endpoints
+            break;
+    
+
         default:
             break;
     }
