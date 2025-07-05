@@ -1238,34 +1238,52 @@ ${result.data.content}`,
   );
 }
 
-// Kagi Summarizer Tool
-if (providerConfig.kagi) {
+// Jina AI Batch Reader Tool
+if (providerConfig.jina) {
   server.tool(
-    "kagi_summarizer",
-    "Summarize content from pages, videos, and podcasts using Kagi Universal Summarizer.",
+    "jina_batch_reader",
+    "Read and analyze multiple URLs at once using Jina AI Reader - great for comparing content across multiple sources.",
     {
-      url: z.string().describe("URL to summarize"),
-      engine: z.enum(['cecil', 'agnes', 'daphne', 'muriel']).optional().describe("Summarization engine"),
-      summary_type: z.enum(['summary', 'takeaways']).optional().describe("Type of summary"),
-      target_language: z.string().optional().describe("Target language for summary"),
-      cache: z.boolean().optional().describe("Use cache for faster responses"),
+      urls: z.array(z.string()).describe("List of URLs to read and analyze"),
+      with_generated_summary: z.boolean().optional().describe("Generate AI summary for each URL"),
+      gather_all_links: z.boolean().optional().describe("Extract all links from each page"),
     },
-    async ({ url, engine, summary_type, target_language, cache }) => {
+    async ({ urls, with_generated_summary, gather_all_links }) => {
       try {
-        const result = await kagiSummarizer(url, {
-          engine: engine || 'cecil',
-          summary_type: summary_type || 'summary',
-          target_language: target_language || 'EN',
-          cache: cache ?? true,
-        });
+        const results = await Promise.all(
+          urls.map(async (url, index) => {
+            try {
+              const result = await jinaReader(url, {
+                with_generated_summary: with_generated_summary ?? true,
+                gather_all_links: gather_all_links ?? false,
+              });
+              return { url, index: index + 1, result, error: null };
+            } catch (error) {
+              return { url, index: index + 1, result: null, error: error instanceof Error ? error.message : String(error) };
+            }
+          })
+        );
 
         return {
           content: [
             {
               type: "text",
-              text: `Kagi Universal Summarizer Results:
+              text: `Jina AI Batch Reader Results:
 
-${JSON.stringify(result, null, 2)}`,
+${results.map(({ url, index, result, error }) => {
+  if (error) {
+    return `${index}. ${url} - ERROR: ${error}`;
+  }
+  if (!result) {
+    return `${index}. ${url} - ERROR: No result`;
+  }
+  return `${index}. ${result.data.title}
+   URL: ${result.data.url}
+   Description: ${result.data.description}
+   Tokens: ${result.data.usage.tokens}
+   Content Preview: ${result.data.content.substring(0, 200)}...
+   `;
+}).join('\n')}`,
             },
           ],
         };
@@ -1274,45 +1292,7 @@ ${JSON.stringify(result, null, 2)}`,
           content: [
             {
               type: "text",
-              text: `Error summarizing with Kagi: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-  );
-}
-
-// Tavily Extract Tool
-if (providerConfig.tavily) {
-  server.tool(
-    "tavily_extract",
-    "Extract raw content from single or multiple web pages using Tavily. Supports configurable extraction depth.",
-    {
-      urls: z.array(z.string()).describe("List of URLs to extract content from"),
-      extraction_depth: z.enum(['basic', 'advanced']).optional().describe("Extraction depth - basic or advanced"),
-    },
-    async ({ urls, extraction_depth }) => {
-      try {
-        const result = await tavilyExtract(urls, { extraction_depth: extraction_depth || 'basic' });
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Tavily Extract Results:
-
-${JSON.stringify(result, null, 2)}`,
-            },
-          ],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error extracting with Tavily: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error with Jina AI batch reading: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
@@ -1597,6 +1577,261 @@ ${JSON.stringify(result, null, 2)}`,
             {
               type: "text",
               text: `Error enriching with Kagi: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+}
+
+// ================ ADDITIONAL TOOLS FOR WORKING PROVIDERS ================
+
+// Tavily Academic Search Tool
+if (providerConfig.tavily) {
+  server.tool(
+    "tavily_search_academic",
+    "Search for academic and research content using Tavily - optimized for scholarly articles, papers, and research materials.",
+    {
+      query: z.string().describe("The academic search query"),
+      include_domains: z.array(z.string()).optional().describe("Academic domains to include (e.g., arxiv.org, scholar.google.com, pubmed.ncbi.nlm.nih.gov)"),
+      exclude_domains: z.array(z.string()).optional().describe("Domains to exclude"),
+      search_depth: z.enum(['basic', 'advanced']).optional().describe("Search depth - advanced recommended for academic content"),
+      max_results: z.number().optional().describe("Maximum number of results to return"),
+    },
+    async ({ query, include_domains, exclude_domains, search_depth, max_results }) => {
+      try {
+        const academicQuery = `${query} research paper academic study`;
+        const academicDomains = include_domains || [
+          'arxiv.org',
+          'scholar.google.com',
+          'pubmed.ncbi.nlm.nih.gov',
+          'ieee.org',
+          'acm.org',
+          'springer.com',
+          'sciencedirect.com',
+          'nature.com',
+          'science.org',
+          'plos.org',
+          'jstor.org',
+          'researchgate.net'
+        ];
+        
+        const result = await tavilySearch(academicQuery, {
+          include_domains: academicDomains,
+          exclude_domains,
+          search_depth: search_depth || 'advanced',
+          include_answer: true,
+          include_raw_content: true,
+          max_results: max_results || 10,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Tavily Academic Search Results for "${query}":
+
+${result.answer ? `Research Summary: ${result.answer}\n\n` : ''}Academic Sources:
+${(result.results || []).map((r, i) => `${i + 1}. ${r.title}
+   URL: ${r.url}
+   Score: ${r.score}
+   Published: ${r.published_date || 'N/A'}
+   Abstract/Content: ${r.content ? r.content.substring(0, 300) + '...' : 'No content available'}
+`).join('\n')}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error performing Tavily academic search: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+}
+
+// Jina AI PDF Reader Tool
+if (providerConfig.jina) {
+  server.tool(
+    "jina_pdf_reader",
+    "Extract and analyze content from PDF files using Jina AI Reader - perfect for research papers, reports, and documents.",
+    {
+      pdf_url: z.string().describe("URL of the PDF file to read"),
+      with_generated_summary: z.boolean().optional().describe("Generate AI summary of the PDF content"),
+      gather_all_images: z.boolean().optional().describe("Extract all images from the PDF"),
+    },
+    async ({ pdf_url, with_generated_summary, gather_all_images }) => {
+      try {
+        const result = await jinaReader(pdf_url, {
+          with_generated_summary: with_generated_summary ?? true,
+          gather_all_images: gather_all_images ?? false,
+          with_generated_alt: true,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Jina AI PDF Reader Results:
+
+Title: ${result.data.title}
+URL: ${result.data.url}
+Description: ${result.data.description}
+Tokens Used: ${result.data.usage.tokens}
+
+PDF Content:
+${result.data.content}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error reading PDF with Jina AI: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+}
+
+// Firecrawl Research Tool
+if (providerConfig.firecrawl) {
+  server.tool(
+    "firecrawl_research",
+    "Conduct research by crawling and extracting information from multiple sources using Firecrawl.",
+    {
+      research_urls: z.array(z.string()).describe("List of URLs to research"),
+      research_question: z.string().describe("The research question or topic to investigate"),
+      extract_schema: z.any().optional().describe("JSON schema for structured data extraction"),
+    },
+    async ({ research_urls, research_question, extract_schema }) => {
+      try {
+        const results = await Promise.all(
+          research_urls.map(async (url, index) => {
+            try {
+              // First scrape the content
+              const scrapeResult = await firecrawlScrape(url, {
+                formats: ['markdown'],
+                onlyMainContent: true,
+              });
+              
+              // Then extract specific information
+              const extractResult = await firecrawlExtract(url, {
+                prompt: `Research question: ${research_question}. Please extract relevant information that answers this question.`,
+                schema: extract_schema,
+              });
+              
+              return { url, index: index + 1, scrape: scrapeResult, extract: extractResult, error: null };
+            } catch (error) {
+              return { url, index: index + 1, scrape: null, extract: null, error: error instanceof Error ? error.message : String(error) };
+            }
+          })
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Firecrawl Research Results:
+
+Research Question: ${research_question}
+
+${results.map(({ url, index, scrape, extract, error }) => {
+  if (error) {
+    return `${index}. ${url} - ERROR: ${error}`;
+  }
+  return `${index}. ${scrape?.data?.metadata?.title || url}
+   URL: ${url}
+   Content Preview: ${scrape?.data?.markdown?.substring(0, 200) || 'No content'}...
+   
+   Research Findings:
+   ${JSON.stringify(extract, null, 2)}
+   `;
+}).join('\n')}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error with Firecrawl research: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+}
+
+// Cross-Provider Fact Verification Tool
+if (providerConfig.tavily && providerConfig.jina) {
+  server.tool(
+    "cross_verify_facts",
+    "Verify facts using multiple sources - combines Tavily search with Jina AI fact grounding for comprehensive verification.",
+    {
+      claim: z.string().describe("The claim or statement to verify"),
+      sources_to_check: z.array(z.string()).optional().describe("Specific sources to check against"),
+      search_depth: z.enum(['basic', 'advanced']).optional().describe("Search depth for fact gathering"),
+    },
+    async ({ claim, sources_to_check, search_depth }) => {
+      try {
+        // First, search for information about the claim
+        const searchResult = await tavilySearch(`verify fact: ${claim}`, {
+          search_depth: search_depth || 'advanced',
+          include_answer: true,
+          include_raw_content: true,
+          max_results: 5,
+        });
+
+        // Then use Jina AI to ground the claim against the search results
+        const sourceContent = (searchResult.results || [])
+          .map(r => `${r.title}: ${r.content}`)
+          .join('\n\n');
+
+        const groundingResult = await jinaGrounding(sourceContent, [claim]);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Cross-Platform Fact Verification Results:
+
+CLAIM: ${claim}
+
+=== SEARCH RESULTS (Tavily) ===
+${searchResult.answer ? `Summary: ${searchResult.answer}\n\n` : ''}Sources Found:
+${(searchResult.results || []).map((r, i) => `${i + 1}. ${r.title}
+   URL: ${r.url}
+   Content: ${r.content ? r.content.substring(0, 200) + '...' : 'No content'}
+`).join('\n')}
+
+=== FACT GROUNDING (Jina AI) ===
+${JSON.stringify(groundingResult, null, 2)}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error with cross-platform fact verification: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
