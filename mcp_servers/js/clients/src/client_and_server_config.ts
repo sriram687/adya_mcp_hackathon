@@ -22,9 +22,9 @@ export const ServersConfig: any = [
     path: "build/index.js", // Wayback Machine build
   },
   {
-    server_name: "RANCHER",
-    server_features_and_capability: "RANCHER",
-    path: "build/index.js", // Rancher build
+    server_name: "CODE-RESEARCH",
+    server_features_and_capability: "CODE-RESEARCH",
+    path: "build/index.js", // CODE-RESEARCH build
   }
 ];
 

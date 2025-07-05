@@ -911,6 +911,11 @@ async function CallAndExecuteTool(selected_server:any, server_credentials:any,to
             // Wayback Machine doesn't require credentials for basic operations
             // All tools work with public API endpoints
             break;
+        case "CODE-RESEARCH":
+            // CODE-RESEARCH doesn't require credentials for basic operations
+            // All tools work with public API endpoints
+            // GitHub token can be provided via environment variable GITHUB_TOKEN for higher rate limits
+            break;
     
 
         default:
