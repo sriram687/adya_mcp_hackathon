@@ -20,6 +20,11 @@ export const ServersConfig: any = [
     server_name: "WAYBACK",
     server_features_and_capability: "WAYBACK",
     path: "build/index.js", // Wayback Machine build
+  },
+  {
+    server_name: "RANCHER",
+    server_features_and_capability: "RANCHER",
+    path: "build/index.js", // Rancher build
   }
 ];
 
