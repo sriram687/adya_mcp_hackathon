@@ -916,6 +916,11 @@ async function CallAndExecuteTool(selected_server:any, server_credentials:any,to
             // All tools work with public API endpoints
             // GitHub token can be provided via environment variable GITHUB_TOKEN for higher rate limits
             break;
+        case "BIGGO":
+            // BigGo doesn't require credentials to be passed in args
+            // Credentials are handled via environment variables in the server
+            // All tools work with the configured BigGo API credentials
+            break;
     
 
         default:

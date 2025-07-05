@@ -25,6 +25,11 @@ export const ServersConfig: any = [
     server_name: "CODE-RESEARCH",
     server_features_and_capability: "CODE-RESEARCH",
     path: "build/index.js", // CODE-RESEARCH build
+  },
+  {
+    server_name: "BIGGO",
+    server_features_and_capability: "BIGGO",
+    path: "build/index.js", // BigGo build
   }
 ];
 
