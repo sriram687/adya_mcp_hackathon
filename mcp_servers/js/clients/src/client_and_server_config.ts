@@ -22,9 +22,9 @@ export const ServersConfig: any = [
     path: "build/index.js", // Wayback Machine build
   },
   {
-    server_name: "RANCHER",
-    server_features_and_capability: "RANCHER",
-    path: "build/index.js", // Rancher build
+    server_name: "OMNISEARCH",
+    server_features_and_capability: "OMNISEARCH - Unified access to multiple search providers and AI tools (Tavily, Brave, Kagi, Perplexity, Jina AI, Firecrawl)",
+    path: "build/index.js", // Omnisearch build
   }
 ];
 
