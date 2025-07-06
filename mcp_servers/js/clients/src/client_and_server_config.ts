@@ -25,7 +25,7 @@ export const ServersConfig: any = [
     server_name: "OMNISEARCH",
     server_features_and_capability: "OMNISEARCH - Unified access to multiple search providers and AI tools (Tavily, Brave, Kagi, Perplexity, Jina AI, Firecrawl)",
     path: "build/index.js", // Omnisearch build
-  },
+  },{
     server_name: "CODE-RESEARCH",
     server_features_and_capability: "CODE-RESEARCH",
     path: "build/index.js", // CODE-RESEARCH build
@@ -34,7 +34,6 @@ export const ServersConfig: any = [
     server_name: "BIGGO",
     server_features_and_capability: "BIGGO",
     path: "build/index.js", // BigGo build
-
   }
 ];
 
