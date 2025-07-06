@@ -1,0 +1,512 @@
+{
+  "info": {
+    "_postman_id": "omnisearch-mcp-2025",
+    "name": "OMNISEARCH-MCP",
+    "description": "Complete testing collection for OMNISEARCH MCP Server with all 19 tools",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "omnisearch-2025"
+  },
+  "item": [
+    {
+      "name": "🔍 OMNISEARCH - Search Tools",
+      "item": [
+        {
+          "name": "1. Tavily General Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Tell me about Tesla's latest electric vehicle models and their features\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a helpful research assistant. Use the OMNISEARCH tools to find comprehensive information.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Tavily general search for Tesla information"
+          }
+        },
+        {
+          "name": "2. Tavily News Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"What are the latest news updates about Tesla stock price and recent announcements?\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a helpful news research assistant. Find the most current information.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Tavily news search for Tesla latest news"
+          }
+        },
+        {
+          "name": "3. Tavily Academic Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Find research papers about electric vehicle battery technology and sustainability studies\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a research assistant. Find academic papers and studies.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Tavily academic search for EV research papers"
+          }
+        },
+        {
+          "name": "4. Brave Privacy Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Search for privacy-focused information about electric vehicle charging infrastructure using Brave search\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a privacy-focused research assistant. Use Brave search for unbiased results.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Brave search for privacy-focused results"
+          }
+        },
+        {
+          "name": "5. Kagi Premium Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Find high-quality information about Tesla's manufacturing processes and quality control\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a quality research assistant. Find premium, ad-free search results.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Kagi premium search for high-quality results"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤖 AI-Powered Tools",
+      "item": [
+        {
+          "name": "6. Perplexity AI Chat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Explain how Tesla's autopilot technology works and compare it to other autonomous driving systems\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are an AI research assistant. Provide detailed analysis and reasoning.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Perplexity AI for complex reasoning and analysis"
+          }
+        },
+        {
+          "name": "7. Kagi FastGPT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"What is Tesla's market capitalization and how does it compare to other automotive companies?\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a quick response assistant. Provide fast, accurate answers.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Kagi FastGPT for instant AI answers"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📄 Content Processing Tools",
+      "item": [
+        {
+          "name": "8. Jina Single Page Reader",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Read and analyze the content from this page: https://example.com\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a content analysis assistant. Extract and analyze webpage content.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Jina Reader for single webpage content extraction"
+          }
+        },
+        {
+          "name": "9. Jina Batch Reader",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Compare content from these pages: {{test-url-tesla}} and {{test-url-ford}}\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a comparison analyst. Compare content from multiple webpages.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Jina Batch Reader for multiple webpage comparison"
+          }
+        },
+        {
+          "name": "10. Jina PDF Reader",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Analyze this Tesla sustainability report PDF: {{test-pdf-url}}\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a PDF analysis assistant. Extract and analyze PDF document content.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Jina PDF Reader for PDF document analysis"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔧 Firecrawl Tools",
+      "item": [
+        {
+          "name": "11. Firecrawl Scrape",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Extract clean content from Tesla's main website: {{test-url-tesla}}\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a content extraction assistant. Get clean, formatted content.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Firecrawl Scrape for clean content extraction"
+          }
+        },
+        {
+          "name": "12. Firecrawl Extract",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Extract all vehicle model names, their starting prices, and key specifications from Tesla's website: {{test-url-tesla}}\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a data extraction assistant. Extract specific structured information.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Firecrawl Extract for AI-powered data extraction"
+          }
+        },
+        {
+          "name": "13. Firecrawl Research",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Research Tesla's competitive position by analyzing these sources: {{test-url-tesla}} and {{test-url-ford}}. Research Question: How does Tesla's EV lineup compare to Ford's electric vehicle offerings?\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a comprehensive research assistant. Conduct detailed analysis across multiple sources.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Firecrawl Research for comprehensive multi-source analysis"
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Verification Tools",
+      "item": [
+        {
+          "name": "14. Cross-Platform Fact Verification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Verify this claim: Tesla's Supercharger network is the largest fast-charging network in the world\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a fact-checking assistant. Verify claims using multiple sources.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test cross-platform fact verification tool"
+          }
+        },
+        {
+          "name": "15. Jina Fact Grounding",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"Verify these facts about Tesla: Tesla Model 3 is the best-selling electric car globally, and Tesla's Gigafactory produces more batteries than any other facility. Use recent Tesla financial reports and industry analysis as source material.\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a fact verification specialist. Ground statements against reliable sources.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test Jina fact grounding for statement verification"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Advanced Testing",
+      "item": [
+        {
+          "name": "Multi-Tool Research Flow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 30000,\n        \"input\": \"1. First, search for Tesla's latest financial results, 2. Then verify the key claims about their performance, 3. Finally, analyze their competitive position in the EV market\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are an advanced research assistant. Use multiple OMNISEARCH tools in sequence to conduct comprehensive analysis.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test multi-tool workflow for comprehensive research"
+          }
+        },
+        {
+          "name": "Tool Selection Accuracy Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_server_credentials\": {\n        \"{{omnisearch-server}}\": {\n            \"TAVILY_API_KEY\": \"{{tavily-api-key}}\",\n            \"JINA_API_KEY\": \"{{jina-api-key}}\",\n            \"FIRECRAWL_API_KEY\": \"{{firecrawl-api-key}}\",\n            \"BRAVE_API_KEY\": \"{{brave-api-key}}\",\n            \"KAGI_API_KEY\": \"{{kagi-api-key}}\",\n            \"PERPLEXITY_API_KEY\": \"{{perplexity-api-key}}\"\n        }\n    },\n    \"client_details\": {\n        \"api_key\": \"{{gemini-api-key}}\",\n        \"temperature\": 0.1,\n        \"max_token\": 20000,\n        \"input\": \"I need to: 1) Get latest Tesla news, 2) Read a specific webpage about Model 3, 3) Find research papers on EV batteries, 4) Verify a claim about Tesla's market position. Choose the right tools for each task.\",\n        \"input_type\": \"text\",\n        \"prompt\": \"You are a tool selection expert. Choose the most appropriate OMNISEARCH tool for each specific task.\",\n        \"chat_model\": \"gemini-2.0-flash-lite\",\n        \"chat_history\": []\n    },\n    \"selected_client\": \"MCP_CLIENT_GEMINI\",\n    \"selected_servers\": [\n        \"{{omnisearch-server}}\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{dev-js-host}}/api/v1/mcp/process_message",
+              "host": ["{{dev-js-host}}"],
+              "path": ["api", "v1", "mcp", "process_message"]
+            },
+            "description": "Test AI's ability to select the correct tools for different tasks"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "{{dev-js-host}}",
+      "type": "string"
+    },
+    {
+      "key": "serverName",
+      "value": "{{omnisearch-server}}",
+      "type": "string"
+    }
+  ]
+}
