@@ -11,7 +11,7 @@ export const ServersConfig: any = [
     server_features_and_capability: "WORDPRESS",
     path: "build/index.js", // WordPress build
   },
-  {
+  {n
     server_name: "PINTEREST", // Pinterest build
     server_features_and_capability: "PINTEREST",
     path: "build/index.js", // same structure
@@ -25,6 +25,16 @@ export const ServersConfig: any = [
     server_name: "OMNISEARCH",
     server_features_and_capability: "OMNISEARCH - Unified access to multiple search providers and AI tools (Tavily, Brave, Kagi, Perplexity, Jina AI, Firecrawl)",
     path: "build/index.js", // Omnisearch build
+  },
+    server_name: "CODE-RESEARCH",
+    server_features_and_capability: "CODE-RESEARCH",
+    path: "build/index.js", // CODE-RESEARCH build
+  },
+  {
+    server_name: "BIGGO",
+    server_features_and_capability: "BIGGO",
+    path: "build/index.js", // BigGo build
+
   }
 ];
 

@@ -911,6 +911,20 @@ async function CallAndExecuteTool(selected_server:any, server_credentials:any,to
             // Wayback Machine doesn't require credentials for basic operations
             // All tools work with public API endpoints
             break;
+        case "CODE-RESEARCH":
+            // CODE-RESEARCH doesn't require credentials for basic operations
+            // All tools work with public API endpoints
+            // GitHub token can be provided via environment variable GITHUB_TOKEN for higher rate limits
+            break;
+        case "BIGGO":
+            // BigGo credentials can be passed via args for flexibility
+            // Server will use these if provided, otherwise fall back to environment variables
+            args["__credentials__"] = {
+                "client_id": server_credentials[selected_server]?.client_id || server_credentials[selected_server]?.BIGGO_MCP_SERVER_CLIENT_ID || "",
+                "client_secret": server_credentials[selected_server]?.client_secret || server_credentials[selected_server]?.BIGGO_MCP_SERVER_CLIENT_SECRET || "",
+                "region": server_credentials[selected_server]?.region || server_credentials[selected_server]?.BIGGO_MCP_SERVER_REGION || "TW"
+            };
+            break;
     
 
         default:

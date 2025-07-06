@@ -915,6 +915,11 @@ async def call_and_execute_tool(
         case "FACEBOOK_ADS_MCP":
             args["__credentials__"]   = creds
             args["server_credentials"] = creds
+        case "CODE-RESEARCH":
+            # CODE-RESEARCH doesn't require credentials for basic operations
+            # All tools work with public API endpoints
+            # GitHub token can be provided via environment variable GITHUB_TOKEN for higher rate limits
+            pass
         case _:
             pass
 
