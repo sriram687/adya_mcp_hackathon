@@ -36,12 +36,15 @@ app.get('/', (req, res) => {
 app.post('/api/v1/mcp/process_message', async (req: any, res: any) => {
   try {
     console.log("⏳ Steps : Process Started ✅...");
-    const data:any = { ...req.body };
+    const data: any = { ...req.body };
+    // Defensive: ensure client_details exists and is an object
+    if (!data.client_details || typeof data.client_details !== 'object') {
+      data.client_details = {};
+    }
     data.client_details["is_stream"] = false;
-    
+
     // =========================================== validation check start =============================================================
-    
-    const validation_result = await ClientAndServerValidation(data, {streamCallbacks : null, is_stream: false});
+    const validation_result = await ClientAndServerValidation(data, { streamCallbacks: null, is_stream: false });
     if (!validation_result.status) {
       console.log("⏳ Steps :  Client & Server Validation Failed ❌...");
       console.log("⏳ Steps : Process Failed ❌...");
@@ -56,13 +59,18 @@ app.post('/api/v1/mcp/process_message', async (req: any, res: any) => {
 
     // =========================================== execution start ====================================================================
     var generated_payload = validation_result.payload;
-    var executionResponse = await ClientAndServerExecution(generated_payload, {streamCallbacks : null, is_stream: false});
-    // =========================================== execution start ====================================================================
+    var executionResponse = await ClientAndServerExecution(generated_payload, { streamCallbacks: null, is_stream: false });
+    // =========================================== execution end ======================================================================
     console.log("⏳ Steps : Client & Server Executed successful✅...");
 
-    console.log("⏳ Steps : Process Completed ✅...");
-    res.status(200).json(executionResponse);
+    // Smooth response: always return a consistent structure
+    res.status(200).json({
+      Data: executionResponse.Data ?? null,
+      Error: executionResponse.Error ?? null,
+      Status: executionResponse.Status ?? false,
+    });
 
+    console.log("⏳ Steps : Process Completed ✅...");
   } catch (error) {
     console.log("Error ========>>>>> ", error);
     console.log("⏳ Steps : Process Failed ❌...");
